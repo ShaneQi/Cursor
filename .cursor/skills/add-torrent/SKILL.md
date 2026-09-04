@@ -10,20 +10,39 @@ description: >-
 # Add Torrent (Movie or Show)
 
 When the user gives a **link** (magnet or torrent URL), run the add request
-right away. Type and title are optional.
+right away. Type and title are optional from the user; if omitted, resolve them
+as described below before posting.
+
+## Parameter order
+
+1. `LINK` (enclosure URL) — required
+2. `KIND` (`movie` or `show`) — optional from the user
+3. `NAME` (title) — optional from the user
+
+Prefer explicit user cues for kind when present (`movie`, `film`, `show`, `series`, `TV`, `episode`).
 
 ## Steps
 
-1. Extract from the message, in this order of priority:
-   - `LINK` (enclosure URL) — required
-   - `KIND` (`movie` or `show`) — optional
-   - `NAME` (title) — optional
-2. Prefer explicit cues for kind when present (`movie`, `film`, `show`, `series`, `TV`, `episode`).
-3. Ensure `PATH_SECRET` is set in the environment. If missing, stop and tell the user to export it.
-4. Run the helper from this skill (preferred — handles JSON escaping and auto-detect):
+1. Ensure `PATH_SECRET` is set in the environment. If missing, stop and tell the user to export it.
+2. If `KIND` or `NAME` is missing, inspect the link first:
 
 ```bash
-.cursor/skills/add-torrent/scripts/add-torrent.sh "LINK" [KIND] [NAME]
+python3 .cursor/skills/add-torrent/scripts/resolve-torrent.py "LINK"
+```
+
+This prints JSON with `title` and `files` from the `.torrent` (or magnet `dn=`).
+
+3. If `NAME` is missing, use the resolved `title` as `NAME`.
+4. If `KIND` is missing, **you (the language model) must decide** `movie` or `show`:
+   - Use the torrent `title` and `files` as primary evidence.
+   - Release tags like `S01E02` / `1x02` usually mean `show`.
+   - A single feature-length `.mkv`/`.mp4` with a film-style name usually means `movie`.
+   - Ambiguous titles (pageants, concerts, stand-up, documentaries, TV specials): check IMDb / TheTVDB / TMDB when needed. Map **TV Series**, **TV Mini Series**, **TV Special**, and episodes → `show`; map theatrical/feature **Movie** → `movie`.
+   - Do **not** fall back to regex/TVMaze auto-classification scripts; decide `KIND` yourself, then pass it into `add-torrent.sh`.
+5. Post with the helper (handles JSON escaping):
+
+```bash
+.cursor/skills/add-torrent/scripts/add-torrent.sh "LINK" "KIND" "NAME"
 ```
 
 Examples:
@@ -31,29 +50,15 @@ Examples:
 ```bash
 # Fully specified
 .cursor/skills/add-torrent/scripts/add-torrent.sh "magnet:?xt=..." "movie" "Inception"
-.cursor/skills/add-torrent/scripts/add-torrent.sh "https://example.com/file.torrent" "show" "Severance"
 
-# Link only — script fetches the torrent, uses its title, and infers movie vs show
-.cursor/skills/add-torrent/scripts/add-torrent.sh "https://example.com/file.torrent"
-
-# Link + kind, title inferred from torrent
-.cursor/skills/add-torrent/scripts/add-torrent.sh "https://example.com/file.torrent" "show"
+# Inspect, then add after deciding kind
+python3 .cursor/skills/add-torrent/scripts/resolve-torrent.py "https://example.com/file.torrent"
+.cursor/skills/add-torrent/scripts/add-torrent.sh "https://example.com/file.torrent" "show" "Severance.S01E01.720p"
 ```
 
-5. Report the HTTP response briefly (success vs error), including the resolved
-   kind/title when they were inferred. Do not print `PATH_SECRET`.
+If `add-torrent.sh` is run without `KIND`, it prints torrent metadata on stderr and exits `2` so you can choose `KIND` and re-run.
 
-## Auto-detect (when KIND and/or NAME are omitted)
-
-The helper script (`resolve-torrent.py` via `add-torrent.sh`):
-
-1. Downloads the `.torrent` (or reads a magnet `dn=`) and takes `info.name` as the title when `NAME` is omitted.
-2. Infers kind when `KIND` is omitted:
-   - Season/episode patterns in the name (`S01E02`, `1x02`, etc.) → `show`
-   - Otherwise checks TVMaze for a matching TV show / episode year → `show` when matched
-   - Otherwise defaults to `movie`
-
-If the link cannot be fetched or metadata is insufficient, pass `KIND` and/or `NAME` explicitly.
+6. Report the HTTP response briefly (success vs error), including the kind/title you used. Do not print `PATH_SECRET`.
 
 ## Curl equivalents
 
