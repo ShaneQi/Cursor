@@ -25,7 +25,7 @@ Prefer explicit user cues for kind when present (`movie`, `film`, `show`, `serie
 
 1. Ensure required env vars are set:
    - `TORRENT_PATH_SECRET` — API path secret. If missing, stop and tell the user to export it.
-   - `TTG_TOKEN` — required when the link is a ToTheGlory **page** URL (`/t/{id}/`). Do not print this value.
+   - `TORRENT_DL_TOKEN` — required when the link is a ToTheGlory **page** URL (`/t/{id}/`). Do not print this value.
 2. If `KIND` or `NAME` is missing, inspect the link first:
 
 ```bash
@@ -52,15 +52,15 @@ Examples:
 ```bash
 # Direct torrent / magnet
 .cursor/skills/add-torrent/scripts/add-torrent.sh "magnet:?xt=..." "movie" "Inception"
-.cursor/skills/add-torrent/scripts/add-torrent.sh "https://totheglory.im/dl/595252/${TTG_TOKEN}" "show"
+.cursor/skills/add-torrent/scripts/add-torrent.sh "https://totheglory.im/dl/595252/${TORRENT_DL_TOKEN}" "show"
 
-# Tracker page link (rewritten to /dl/{id}/{TTG_TOKEN} automatically)
+# Tracker page link (rewritten to /dl/{id}/{TORRENT_DL_TOKEN} automatically)
 .cursor/skills/add-torrent/scripts/add-torrent.sh "https://totheglory.im/t/595252/" "show"
 ```
 
 If `add-torrent.sh` is run without `KIND`, it prints torrent metadata on stderr and exits `2` so you can choose `KIND` and re-run.
 
-6. Report the HTTP response briefly (success vs error), including the kind/title you used. Do not print `TORRENT_PATH_SECRET` or `TTG_TOKEN`.
+6. Report the HTTP response briefly (success vs error), including the kind/title you used. Do not print `TORRENT_PATH_SECRET` or `TORRENT_DL_TOKEN`.
 
 ## Page link → direct torrent link
 
@@ -71,9 +71,9 @@ ToTheGlory:
 | Kind | Example |
 |------|---------|
 | Page | `https://totheglory.im/t/595252/` |
-| Direct | `https://totheglory.im/dl/595252/{TTG_TOKEN}` |
+| Direct | `https://totheglory.im/dl/595252/{TORRENT_DL_TOKEN}` |
 
-`resolve-torrent.py` / `add-torrent.sh` perform this rewrite when `TTG_TOKEN` is set. Always POST the **direct** `enclosure` URL to the worker API, never the page URL.
+`resolve-torrent.py` / `add-torrent.sh` perform this rewrite when `TORRENT_DL_TOKEN` is set. Always POST the **direct** `enclosure` URL to the worker API, never the page URL.
 
 ## Curl equivalents
 
@@ -96,6 +96,6 @@ curl -sS -X POST "https://torrents.qizengtai.workers.dev/f/${TORRENT_PATH_SECRET
 ## Notes
 
 - Parameter order is always: **link**, then optional **type**, then optional **name**.
-- `TORRENT_PATH_SECRET` and `TTG_TOKEN` come from the environment — never hardcode or print them.
+- `TORRENT_PATH_SECRET` and `TORRENT_DL_TOKEN` come from the environment — never hardcode or print them.
 - Escape/quoting: always prefer the helper script so magnets with `&`/`?` stay valid JSON.
 - The only API difference between movies and shows is the path segment (`movies` vs `shows`).

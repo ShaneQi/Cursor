@@ -100,16 +100,16 @@ def magnet_display_name(link: str) -> str | None:
 def normalize_enclosure(link: str) -> tuple[str, bool]:
     """Return (enclosure_url, rewritten).
 
-    ToTheGlory /t/{id}/ page links become /dl/{id}/{TTG_TOKEN}.
+    ToTheGlory /t/{id}/ page links become /dl/{id}/{TORRENT_DL_TOKEN}.
     """
     stripped = link.strip()
     page = TTG_PAGE_RE.match(stripped)
     if page:
         torrent_id = page.group(1)
-        token = os.environ.get("TTG_TOKEN", "").strip()
+        token = os.environ.get("TORRENT_DL_TOKEN", "").strip()
         if not token:
             raise SystemExit(
-                "TTG page link requires TTG_TOKEN in the environment "
+                "TTG page link requires TORRENT_DL_TOKEN in the environment "
                 f"(id={torrent_id})."
             )
         return f"https://totheglory.im/dl/{torrent_id}/{token}", True
@@ -118,8 +118,8 @@ def normalize_enclosure(link: str) -> tuple[str, bool]:
 
 
 def redact_enclosure(url: str) -> str:
-    """Hide TTG_TOKEN in URLs printed for humans/agents."""
-    token = os.environ.get("TTG_TOKEN", "").strip()
+    """Hide TORRENT_DL_TOKEN in URLs printed for humans/agents."""
+    token = os.environ.get("TORRENT_DL_TOKEN", "").strip()
     if token and token in url:
         return url.replace(token, "***")
     m = TTG_DL_RE.match(url)

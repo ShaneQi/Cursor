@@ -7,7 +7,7 @@ if [[ $# -lt 1 ]]; then
   echo "Usage: add-torrent.sh \"ENCLOSURE_OR_PAGE_URL\" [movie|show] [TITLE]" >&2
   echo "When TYPE or TITLE are omitted, inspect first with resolve-torrent.py;" >&2
   echo "the agent must choose TYPE (movie|show) before posting." >&2
-  echo "ToTheGlory /t/{id}/ page links are rewritten to /dl/{id}/\$TTG_TOKEN." >&2
+  echo "ToTheGlory /t/{id}/ page links are rewritten to /dl/{id}/\$TORRENT_DL_TOKEN." >&2
   exit 1
 fi
 
@@ -20,7 +20,7 @@ if [[ -z "${TORRENT_PATH_SECRET:-}" ]]; then
   exit 1
 fi
 
-# Rewrite page links → direct enclosure (uses TTG_TOKEN when needed).
+# Rewrite page links → direct enclosure (uses TORRENT_DL_TOKEN when needed).
 ENCLOSURE="$(python3 "$SCRIPT_DIR/resolve-torrent.py" --normalize-only "$LINK")"
 # Inspect for title/files (JSON redacts token in enclosure).
 META="$(python3 "$SCRIPT_DIR/resolve-torrent.py" "$LINK")"
