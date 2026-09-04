@@ -4,9 +4,10 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 if [[ $# -lt 1 ]]; then
-  echo "Usage: add-torrent.sh \"ENCLOSURE_URL\" [movie|show] [TITLE]" >&2
+  echo "Usage: add-torrent.sh \"ENCLOSURE_OR_PAGE_URL\" [movie|show] [TITLE]" >&2
   echo "When TYPE or TITLE are omitted, inspect first with resolve-torrent.py;" >&2
   echo "the agent must choose TYPE (movie|show) before posting." >&2
+  echo "ToTheGlory /t/{id}/ page links are rewritten to /dl/{id}/\$TTG_TOKEN." >&2
   exit 1
 fi
 
@@ -19,7 +20,9 @@ if [[ -z "${PATH_SECRET:-}" ]]; then
   exit 1
 fi
 
-# Always inspect so we can fill TITLE and show context on stderr.
+# Rewrite page links → direct enclosure (uses TTG_TOKEN when needed).
+ENCLOSURE="$(python3 "$SCRIPT_DIR/resolve-torrent.py" --normalize-only "$LINK")"
+# Inspect for title/files (JSON redacts token in enclosure).
 META="$(python3 "$SCRIPT_DIR/resolve-torrent.py" "$LINK")"
 if [[ -z "$TITLE" ]]; then
   TITLE="$(python3 -c 'import json,sys; print(json.load(sys.stdin)["title"])' <<<"$META")"
@@ -47,7 +50,7 @@ case "$KIND" in
     ;;
 esac
 
-BODY="$(python3 -c 'import json,sys; print(json.dumps({"title":sys.argv[1],"enclosure":sys.argv[2]}))' "$TITLE" "$LINK")"
+BODY="$(python3 -c 'import json,sys; print(json.dumps({"title":sys.argv[1],"enclosure":sys.argv[2]}))' "$TITLE" "$ENCLOSURE")"
 echo "Resolved: kind=$NORM_KIND title=$TITLE" >&2
 
 curl -sS -X POST "https://torrents.qizengtai.workers.dev/f/${PATH_SECRET}/${PATH_KIND}/add" \
