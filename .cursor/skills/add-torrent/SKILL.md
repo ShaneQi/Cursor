@@ -24,7 +24,7 @@ Prefer explicit user cues for kind when present (`movie`, `film`, `show`, `serie
 ## Steps
 
 1. Ensure required env vars are set:
-   - `PATH_SECRET` — API path secret. If missing, stop and tell the user to export it.
+   - `TORRENT_PATH_SECRET` — API path secret. If missing, stop and tell the user to export it.
    - `TTG_TOKEN` — required when the link is a ToTheGlory **page** URL (`/t/{id}/`). Do not print this value.
 2. If `KIND` or `NAME` is missing, inspect the link first:
 
@@ -60,7 +60,7 @@ Examples:
 
 If `add-torrent.sh` is run without `KIND`, it prints torrent metadata on stderr and exits `2` so you can choose `KIND` and re-run.
 
-6. Report the HTTP response briefly (success vs error), including the kind/title you used. Do not print `PATH_SECRET` or `TTG_TOKEN`.
+6. Report the HTTP response briefly (success vs error), including the kind/title you used. Do not print `TORRENT_PATH_SECRET` or `TTG_TOKEN`.
 
 ## Page link → direct torrent link
 
@@ -80,7 +80,7 @@ ToTheGlory:
 Movies:
 
 ```bash
-curl -sS -X POST "https://torrents.qizengtai.workers.dev/f/${PATH_SECRET}/movies/add" \
+curl -sS -X POST "https://torrents.qizengtai.workers.dev/f/${TORRENT_PATH_SECRET}/movies/add" \
   -H "Content-Type: application/json" \
   -d "{\"title\":\"NAME\",\"enclosure\":\"DIRECT_LINK\"}"
 ```
@@ -88,7 +88,7 @@ curl -sS -X POST "https://torrents.qizengtai.workers.dev/f/${PATH_SECRET}/movies
 Shows:
 
 ```bash
-curl -sS -X POST "https://torrents.qizengtai.workers.dev/f/${PATH_SECRET}/shows/add" \
+curl -sS -X POST "https://torrents.qizengtai.workers.dev/f/${TORRENT_PATH_SECRET}/shows/add" \
   -H "Content-Type: application/json" \
   -d "{\"title\":\"NAME\",\"enclosure\":\"DIRECT_LINK\"}"
 ```
@@ -96,6 +96,6 @@ curl -sS -X POST "https://torrents.qizengtai.workers.dev/f/${PATH_SECRET}/shows/
 ## Notes
 
 - Parameter order is always: **link**, then optional **type**, then optional **name**.
-- `PATH_SECRET` and `TTG_TOKEN` come from the environment — never hardcode or print them.
+- `TORRENT_PATH_SECRET` and `TTG_TOKEN` come from the environment — never hardcode or print them.
 - Escape/quoting: always prefer the helper script so magnets with `&`/`?` stay valid JSON.
 - The only API difference between movies and shows is the path segment (`movies` vs `shows`).

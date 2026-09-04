@@ -15,8 +15,8 @@ LINK="$1"
 KIND="${2:-}"
 TITLE="${3:-}"
 
-if [[ -z "${PATH_SECRET:-}" ]]; then
-  echo "PATH_SECRET is not set in the environment." >&2
+if [[ -z "${TORRENT_PATH_SECRET:-}" ]]; then
+  echo "TORRENT_PATH_SECRET is not set in the environment." >&2
   exit 1
 fi
 
@@ -53,7 +53,7 @@ esac
 BODY="$(python3 -c 'import json,sys; print(json.dumps({"title":sys.argv[1],"enclosure":sys.argv[2]}))' "$TITLE" "$ENCLOSURE")"
 echo "Resolved: kind=$NORM_KIND title=$TITLE" >&2
 
-curl -sS -X POST "https://torrents.qizengtai.workers.dev/f/${PATH_SECRET}/${PATH_KIND}/add" \
+curl -sS -X POST "https://torrents.qizengtai.workers.dev/f/${TORRENT_PATH_SECRET}/${PATH_KIND}/add" \
   -H "Content-Type: application/json" \
   -d "$BODY"
 echo
