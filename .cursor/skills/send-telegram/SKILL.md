@@ -1,9 +1,10 @@
 ---
 name: send-telegram
 description: >-
-  Sends a Telegram message via the Bot API using TELEGRAM_BOT_TOKEN and
+  Sends a Telegram message or photo via the Bot API using TELEGRAM_BOT_TOKEN and
   TELEGRAM_CHAT_ID. Use when the user asks to send, notify, or message via
-  Telegram, or to post a status/alert to their Telegram chat.
+  Telegram, to post a status/alert to their Telegram chat, or to send an image
+  file/photo with an optional caption.
 ---
 
 # Send Telegram Message
@@ -49,8 +50,15 @@ python3 .cursor/skills/send-telegram/scripts/send-telegram.py --parse-mode HTML 
 python3 .cursor/skills/send-telegram/scripts/send-telegram.py --parse-mode MarkdownV2 "MESSAGE"
 ```
 
-3. Report briefly from the JSON stdout (`ok`, `message_id`). On non-zero exit,
-   summarize the stderr error without leaking credentials.
+Send a photo (optional caption = message argument):
+
+```bash
+python3 .cursor/skills/send-telegram/scripts/send-telegram.py --photo /path/to/image.png "CAPTION"
+python3 .cursor/skills/send-telegram/scripts/send-telegram.py --photo /path/to/image.png
+```
+
+3. Report briefly from the JSON stdout (`ok`, `kind`, `message_id`). On
+   non-zero exit, summarize the stderr error without leaking credentials.
 
 ## Notes
 
