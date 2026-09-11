@@ -1,10 +1,11 @@
 ---
 name: wmt-vti-ratio
 description: >-
-  Fetches WMT and VTI prices, computes the WMT/VTI ratio, and always sends the
-  result via the send-telegram skill. Uses live market price when the US
-  regular session is open, otherwise the latest close. Use when asked for WMT
-  vs VTI (or former FSKAX) prices, their ratio, or to Telegram that ratio.
+  Fetches WMT and VTI prices, computes the WMT/VTI ratio, renders a 45-day
+  ratio chart (today = live/spot), and always sends the chart photo first then
+  a text summary via the send-telegram skill. Uses live market price when the
+  US regular session is open, otherwise the latest close. Use when asked for
+  WMT vs VTI (or former FSKAX) prices, their ratio, or to Telegram that ratio.
 ---
 
 # WMT / VTI Ratio
@@ -23,6 +24,8 @@ share the same intraday price clock.
   for both WMT and VTI.
 - If the session is **closed**: use the **latest regular-session close** for
   both.
+- The **45-day chart** uses daily closes for prior days, and uses the same
+  spot quote as **today's** ratio point (live while open).
 
 ## Required env vars
 
@@ -32,6 +35,10 @@ share the same intraday price clock.
 If either is missing, stop and tell the user to export it. Never print the
 token or chat id.
 
+## Dependencies
+
+- `matplotlib` (for chart PNG rendering)
+
 ## Steps
 
 1. Confirm Telegram env vars are set (presence only; do not echo values):
@@ -40,15 +47,29 @@ token or chat id.
 test -n "$TELEGRAM_BOT_TOKEN" && test -n "$TELEGRAM_CHAT_ID" && echo ok
 ```
 
-2. Fetch prices and ratio:
+2. Fetch prices, ratio, and chart:
 
 ```bash
 python3 .cursor/skills/wmt-vti-ratio/scripts/wmt-vti-ratio.py
 ```
 
-Stdout is JSON with `market_open`, `wmt`, `vti`, and `ratio`.
+Stdout is JSON with `market_open`, `wmt`, `vti`, `ratio`, `history`,
+`chart_path`, and `chart` stats.
 
-3. **Always** send via `send-telegram` with a short message built from the JSON:
+3. **Always send the chart photo first** via `send-telegram`:
+
+```bash
+python3 .cursor/skills/send-telegram/scripts/send-telegram.py \
+  --photo "$CHART_PATH" \
+  "WMT/VTI — past 45 days (today = live|close)
+High HIGH (MAX_DATE) · Low LOW (MIN_DATE) · Mean MEAN · Now RATIO"
+```
+
+Use `chart_path` plus `chart.max`, `chart.max_date`, `chart.min`,
+`chart.min_date`, `chart.mean`, `chart.last`, and `chart.today_price_type`
+(`live` or `close`) from the JSON.
+
+4. **Then** send the text summary:
 
 ```text
 WMT/VTI ratio
@@ -64,13 +85,15 @@ As of: TIMESTAMP
 python3 .cursor/skills/send-telegram/scripts/send-telegram.py "MESSAGE"
 ```
 
-4. Report briefly: market open/closed, both prices with `price_type`, ratio,
-   and Telegram `message_id`. Never print `TELEGRAM_BOT_TOKEN` or
-   `TELEGRAM_CHAT_ID`.
+5. Report briefly: market open/closed, both prices with `price_type`, ratio,
+   chart `message_id`, and text `message_id`. Never print `TELEGRAM_BOT_TOKEN`
+   or `TELEGRAM_CHAT_ID`.
 
 ## Notes
 
 - Prefer this helper over ad-hoc Yahoo/`curl` scrapes so open vs close selection
   stays consistent.
-- Requires outbound HTTPS to Yahoo Finance chart endpoints.
-- Telegram delivery is mandatory on every run of this skill.
+- Requires outbound HTTPS to Yahoo Finance chart endpoints and Telegram.
+- Telegram delivery is mandatory on every run: **photo first**, then text.
+- Do not skip the chart unless rendering fails after installing matplotlib;
+  if chart render fails, stop and report the error (do not send text-only).

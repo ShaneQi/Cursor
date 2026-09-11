@@ -24,6 +24,7 @@ Simple messaging integration for notifications and alerts.
 - **Location**: `.cursor/skills/send-telegram/`
 - **Features**:
   - Post messages via Telegram Bot API
+  - Send photos with optional captions (`--photo`)
   - Receive alerts and notifications from other skills
   - Requires: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` environment variables
 
@@ -34,9 +35,10 @@ Real-time financial market data monitoring.
 - **Features**:
   - Fetch live WMT (Walmart) and VTI (Vanguard Total Stock Market ETF) prices
   - Calculate and report WMT/VTI ratio (liquid proxy for former FSKAX comparison)
+  - Render a 45-day close-price ratio chart (today = live/spot) and Telegram it first
   - Support for both regular trading hours and after-hours data
   - Automatic Telegram notifications
-  - Requires: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` environment variables
+  - Requires: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `matplotlib`
 
 ### Check TLS Certificates
 Monitor HTTPS certificate expiry and validity.
