@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
-"""Fetch WMT and FSKAX prices and print WMT/FSKAX ratio as JSON.
+"""Fetch WMT and VTI prices and print WMT/VTI ratio as JSON.
 
 Price selection:
 - If the US regular equity session is open: use the live market price.
-- If the session is closed: use the latest regular-session close / NAV.
+- If the session is closed: use the latest regular-session close.
+
+VTI (Vanguard Total Stock Market ETF) is the liquid proxy for FSKAX-style
+total-market exposure, so both legs share the same intraday clock.
 """
 
 from __future__ import annotations
@@ -17,7 +20,7 @@ from datetime import datetime, timezone
 from typing import Any
 
 YAHOO_CHART = "https://query1.finance.yahoo.com/v8/finance/chart/{symbol}"
-USER_AGENT = "Mozilla/5.0 (compatible; wmt-fskax-ratio/1.0)"
+USER_AGENT = "Mozilla/5.0 (compatible; wmt-vti-ratio/1.0)"
 
 
 def _get_json(url: str) -> dict[str, Any]:
@@ -64,7 +67,7 @@ def _daily_close(symbol: str) -> tuple[float, int]:
     result = _chart(symbol, interval="1d", range_="10d")
     meta = result.get("meta") or {}
     # When the session is closed, Yahoo's regularMarket* fields are the last
-    # official close/NAV and the correct as-of timestamp (daily bar stamps are
+    # official close and the correct as-of timestamp (daily bar stamps are
     # often the session open, which is misleading).
     price = meta.get("regularMarketPrice")
     ts = meta.get("regularMarketTime")
@@ -95,14 +98,12 @@ def _live_equity_price(symbol: str) -> tuple[float, int]:
     return float(price), int(ts)
 
 
-def fetch_quote(symbol: str, *, instrument: str, market_open: bool) -> dict[str, Any]:
-    """Return price fields for one symbol."""
-    if instrument == "equity" and market_open:
+def fetch_quote(symbol: str, *, market_open: bool) -> dict[str, Any]:
+    """Return price fields for one equity symbol."""
+    if market_open:
         price, as_of = _live_equity_price(symbol)
         price_type = "market"
     else:
-        # Mutual funds only publish a daily NAV; when the equity market is open
-        # that NAV is still the prior close until after the next settlement.
         price, as_of = _daily_close(symbol)
         price_type = "close"
 
@@ -129,18 +130,18 @@ def main() -> int:
     now = datetime.now(timezone.utc).timestamp()
     market_open = _is_regular_session_open(session_meta, now)
 
-    wmt = fetch_quote("WMT", instrument="equity", market_open=market_open)
-    fskax = fetch_quote("FSKAX", instrument="mutualfund", market_open=market_open)
+    wmt = fetch_quote("WMT", market_open=market_open)
+    vti = fetch_quote("VTI", market_open=market_open)
 
-    ratio = wmt["price"] / fskax["price"]
+    ratio = wmt["price"] / vti["price"]
     payload = {
         "ok": True,
         "market_open": market_open,
         "as_of_check": datetime.now(timezone.utc).isoformat(),
         "wmt": wmt,
-        "fskax": fskax,
+        "vti": vti,
         "ratio": round(ratio, 6),
-        "ratio_formula": "WMT/FSKAX",
+        "ratio_formula": "WMT/VTI",
     }
     print(json.dumps(payload))
 
@@ -148,7 +149,7 @@ def main() -> int:
         state = "OPEN (market price)" if market_open else "CLOSED (close price)"
         print(
             f"WMT ${wmt['price']:.2f} ({wmt['price_type']}) / "
-            f"FSKAX ${fskax['price']:.2f} ({fskax['price_type']}) = {ratio:.6f} "
+            f"VTI ${vti['price']:.2f} ({vti['price_type']}) = {ratio:.6f} "
             f"[US regular session {state}]",
             file=sys.stderr,
         )

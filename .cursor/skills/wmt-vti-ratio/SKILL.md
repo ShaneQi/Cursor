@@ -1,26 +1,28 @@
 ---
-name: wmt-fskax-ratio
+name: wmt-vti-ratio
 description: >-
-  Fetches WMT and FSKAX prices, computes the WMT/FSKAX ratio, and always sends
-  the result via the send-telegram skill. Uses live market price when the US
-  regular session is open, otherwise the latest close/NAV. Use when asked for
-  WMT vs FSKAX prices, their ratio, or to Telegram that ratio.
+  Fetches WMT and VTI prices, computes the WMT/VTI ratio, and always sends the
+  result via the send-telegram skill. Uses live market price when the US
+  regular session is open, otherwise the latest close. Use when asked for WMT
+  vs VTI (or former FSKAX) prices, their ratio, or to Telegram that ratio.
 ---
 
-# WMT / FSKAX Ratio
+# WMT / VTI Ratio
 
-When the user asks for WMT and FSKAX prices, their ratio (`WMT/FSKAX`), or
-invokes this skill, run the helper immediately and **always** send the result
-via the `send-telegram` skill. Do not invent prices from memory. Do not skip
-Telegram delivery.
+When the user asks for WMT and VTI prices, their ratio (`WMT/VTI`), a former
+WMT/FSKAX ratio request, or invokes this skill, run the helper immediately and
+**always** send the result via the `send-telegram` skill. Do not invent prices
+from memory. Do not skip Telegram delivery.
+
+VTI is the liquid total-market ETF proxy for FSKAX-style exposure, so both legs
+share the same intraday price clock.
 
 ## Price rules
 
-- If the **US regular equity session is open**: use the **live market price**.
-- If the session is **closed**: use the **latest regular-session close** (for
-  FSKAX, the latest published NAV).
-- FSKAX is a mutual fund (end-of-day NAV only). While the equity market is open,
-  its price is still the prior NAV until the next NAV publishes after close.
+- If the **US regular equity session is open**: use the **live market price**
+  for both WMT and VTI.
+- If the session is **closed**: use the **latest regular-session close** for
+  both.
 
 ## Required env vars
 
@@ -41,19 +43,19 @@ test -n "$TELEGRAM_BOT_TOKEN" && test -n "$TELEGRAM_CHAT_ID" && echo ok
 2. Fetch prices and ratio:
 
 ```bash
-python3 .cursor/skills/wmt-fskax-ratio/scripts/wmt-fskax-ratio.py
+python3 .cursor/skills/wmt-vti-ratio/scripts/wmt-vti-ratio.py
 ```
 
-Stdout is JSON with `market_open`, `wmt`, `fskax`, and `ratio`.
+Stdout is JSON with `market_open`, `wmt`, `vti`, and `ratio`.
 
 3. **Always** send via `send-telegram` with a short message built from the JSON:
 
 ```text
-WMT/FSKAX ratio
+WMT/VTI ratio
 
 Market: CLOSED (close) | OPEN (market)
 WMT:   $PRICE (price_type)
-FSKAX: $PRICE (price_type)
+VTI:   $PRICE (price_type)
 Ratio: RATIO
 As of: TIMESTAMP
 ```

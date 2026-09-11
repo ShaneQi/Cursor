@@ -27,13 +27,13 @@ Simple messaging integration for notifications and alerts.
   - Receive alerts and notifications from other skills
   - Requires: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` environment variables
 
-### WMT/FSKAX Ratio
+### WMT/VTI Ratio
 Real-time financial market data monitoring.
 
-- **Location**: `.cursor/skills/wmt-fskax-ratio/`
+- **Location**: `.cursor/skills/wmt-vti-ratio/`
 - **Features**:
-  - Fetch live WMT (Walmart) and FSKAX (Fidelity S&P 500) prices
-  - Calculate and report WMT/FSKAX ratio
+  - Fetch live WMT (Walmart) and VTI (Vanguard Total Stock Market ETF) prices
+  - Calculate and report WMT/VTI ratio (liquid proxy for former FSKAX comparison)
   - Support for both regular trading hours and after-hours data
   - Automatic Telegram notifications
   - Requires: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` environment variables
@@ -63,7 +63,7 @@ Automate financial record management.
 ├── skills/
 │   ├── add-torrent/
 │   ├── send-telegram/
-│   ├── wmt-fskax-ratio/
+│   ├── wmt-vti-ratio/
 │   ├── check-tls-certs/
 │   └── fill-card-statements/
 ```
