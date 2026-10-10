@@ -50,14 +50,6 @@ Monitor HTTPS certificate expiry and validity.
   - Check expiry dates and certificate trust status
   - Report on both apex and www domains
 
-### Fill Card Statements
-Automate financial record management.
-
-- **Location**: `.cursor/skills/fill-card-statements/`
-- **Features**:
-  - Populate card statement information
-  - See `SKILL.md` in the skill directory for detailed usage and implementation
-
 ### iCloud Calendar
 Read and write iCloud Calendar over CalDAV.
 
@@ -77,7 +69,7 @@ Read and write iCloud Calendar over CalDAV.
 │   ├── send-telegram/
 │   ├── wmt-vti-ratio/
 │   ├── check-https-certs/
-│   ├── fill-card-statements/
+│   ├── moin-wiki/
 │   └── icloud-calendar/
 ```
 
