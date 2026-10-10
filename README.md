@@ -58,6 +58,16 @@ Automate financial record management.
   - Populate card statement information
   - See `SKILL.md` in the skill directory for detailed usage and implementation
 
+### iCloud Calendar
+Read and write iCloud Calendar over CalDAV.
+
+- **Location**: `.cursor/skills/icloud-calendar/`
+- **Features**:
+  - List calendars and events
+  - Create and delete events
+  - Default target calendar: `Qi`
+  - Requires: `ICLOUD_EMAIL` (Apple ID), `ICLOUD_CALDAV` (app-specific password)
+
 ## Project Structure
 
 ```
@@ -66,8 +76,9 @@ Automate financial record management.
 │   ├── add-torrent/
 │   ├── send-telegram/
 │   ├── wmt-vti-ratio/
-│   ├── check-tls-certs/
-│   └── fill-card-statements/
+│   ├── check-https-certs/
+│   ├── fill-card-statements/
+│   └── icloud-calendar/
 ```
 
 Each skill contains:
@@ -90,6 +101,8 @@ Each skill contains:
    export TELEGRAM_CHAT_ID="your_chat_id"
    export TORRENT_PATH_SECRET="your_secret"
    export TORRENT_DL_TOKEN="your_token"
+   export ICLOUD_EMAIL="your_apple_id@example.com"
+   export ICLOUD_CALDAV="your-app-specific-password"
    ```
 
 3. **Use skills in Cursor**:
