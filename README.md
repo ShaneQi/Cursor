@@ -50,6 +50,16 @@ Monitor HTTPS certificate expiry and validity.
   - Check expiry dates and certificate trust status
   - Report on both apex and www domains
 
+### iCloud Calendar
+Read and write iCloud Calendar over CalDAV.
+
+- **Location**: `.cursor/skills/icloud-calendar/`
+- **Features**:
+  - List calendars and events
+  - Create and delete events
+  - Default target calendar: `Qi`
+  - Requires: `ICLOUD_EMAIL` (Apple ID), `ICLOUD_CALDAV` (app-specific password)
+
 ## Project Structure
 
 ```
@@ -58,7 +68,9 @@ Monitor HTTPS certificate expiry and validity.
 │   ├── add-torrent/
 │   ├── send-telegram/
 │   ├── wmt-vti-ratio/
-│   └── check-tls-certs/
+│   ├── check-https-certs/
+│   ├── moin-wiki/
+│   └── icloud-calendar/
 ```
 
 Each skill contains:
@@ -81,6 +93,8 @@ Each skill contains:
    export TELEGRAM_CHAT_ID="your_chat_id"
    export TORRENT_PATH_SECRET="your_secret"
    export TORRENT_DL_TOKEN="your_token"
+   export ICLOUD_EMAIL="your_apple_id@example.com"
+   export ICLOUD_CALDAV="your-app-specific-password"
    ```
 
 3. **Use skills in Cursor**:
