@@ -50,14 +50,6 @@ Monitor HTTPS certificate expiry and validity.
   - Check expiry dates and certificate trust status
   - Report on both apex and www domains
 
-### Fill Card Statements
-Automate financial record management.
-
-- **Location**: `.cursor/skills/fill-card-statements/`
-- **Features**:
-  - Populate card statement information
-  - See `SKILL.md` in the skill directory for detailed usage and implementation
-
 ## Project Structure
 
 ```
@@ -66,8 +58,7 @@ Automate financial record management.
 │   ├── add-torrent/
 │   ├── send-telegram/
 │   ├── wmt-vti-ratio/
-│   ├── check-tls-certs/
-│   └── fill-card-statements/
+│   └── check-tls-certs/
 ```
 
 Each skill contains:
