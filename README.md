@@ -28,18 +28,6 @@ Simple messaging integration for notifications and alerts.
   - Receive alerts and notifications from other skills
   - Requires: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` environment variables
 
-### WMT/VTI Ratio
-Real-time financial market data monitoring.
-
-- **Location**: `.cursor/skills/wmt-vti-ratio/`
-- **Features**:
-  - Fetch live WMT (Walmart) and VTI (Vanguard Total Stock Market ETF) prices
-  - Calculate and report WMT/VTI ratio (liquid proxy for former FSKAX comparison)
-  - Render a 45-day close-price ratio chart (today = live/spot) and Telegram it first
-  - Use live prices during the US regular session, latest close otherwise
-  - Automatic Telegram notifications (via Send Telegram)
-  - Requires: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `matplotlib`
-
 ### Check HTTPS Certificates
 Monitor HTTPS certificate expiry and validity.
 
@@ -79,7 +67,6 @@ Read and write iCloud Calendar over CalDAV.
 └── skills/
     ├── add-torrent/
     ├── send-telegram/
-    ├── wmt-vti-ratio/
     ├── check-https-certs/
     ├── moin-wiki/
     └── icloud-calendar/
@@ -111,17 +98,12 @@ Each skill contains:
    export ICLOUD_CALDAV="your-app-specific-password"
    ```
 
-3. **Install optional dependencies** (only needed for the WMT/VTI chart):
-   ```bash
-   pip install matplotlib
-   ```
-
-4. **Use skills in Cursor**:
+3. **Use skills in Cursor**:
    Cursor agents can discover and use these skills automatically when the `.cursor` directory is present in your project.
 
 ## Requirements
 
-- **Python 3.9+** — all helpers use only the standard library, except `matplotlib` for the WMT/VTI chart
+- **Python 3.9+** — all helpers use only the standard library
 - **Bash** and **curl** — for `add-torrent.sh`
 - Outbound HTTPS access to the services each skill talks to
 
