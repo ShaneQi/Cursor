@@ -14,8 +14,8 @@ Manages movie and show torrents with smart auto-detection.
 - **Location**: `.cursor/skills/add-torrent/`
 - **Features**:
   - Add torrents to your media library (movies or shows)
-  - Auto-detect content type (movie vs. show) and title from torrent metadata
-  - Support for ToTheGlory page link rewrites
+  - Inspect torrent metadata (title, files) so the agent can pick the type and title
+  - Rewrite ToTheGlory page links (`/t/{id}/`) to direct download links
   - Requires: `TORRENT_PATH_SECRET`, `TORRENT_DL_TOKEN` environment variables
 
 ### Send Telegram
@@ -36,19 +36,30 @@ Real-time financial market data monitoring.
   - Fetch live WMT (Walmart) and VTI (Vanguard Total Stock Market ETF) prices
   - Calculate and report WMT/VTI ratio (liquid proxy for former FSKAX comparison)
   - Render a 45-day close-price ratio chart (today = live/spot) and Telegram it first
-  - Support for both regular trading hours and after-hours data
-  - Automatic Telegram notifications
+  - Use live prices during the US regular session, latest close otherwise
+  - Automatic Telegram notifications (via Send Telegram)
   - Requires: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `matplotlib`
 
-### Check TLS Certificates
+### Check HTTPS Certificates
 Monitor HTTPS certificate expiry and validity.
 
-- **Location**: `.cursor/skills/check-tls-certs/`
+- **Location**: `.cursor/skills/check-https-certs/`
 - **Features**:
-  - Verify TLS certificates for multiple domains
-  - Monitor: `shaneqi.*`, `ruzhang.dev`, `eastwatch.*`, `qis.family`
-  - Check expiry dates and certificate trust status
-  - Report on both apex and www domains
+  - Verify TLS certificates for multiple domains in parallel
+  - Monitor: `shaneqi.dev`, `shaneqi.com`, `ruzhang.dev`, `eastwatch.app`, `eastwatchapp.com`, `qis.family`
+  - Check expiry dates and certificate trust status (warn ≤30 days, critical ≤14 days)
+  - Report on both apex and www domains, as a table or `--json`
+
+### Moin Wiki
+Search and read the private MoinMoin wiki at `wiki.qis.family`.
+
+- **Location**: `.cursor/skills/moin-wiki/`
+- **Features**:
+  - Full-text search with optional page excerpts or full markup
+  - Fetch a page or its metadata by exact name
+  - List and filter page titles
+  - Read-only (no edits or deletes)
+  - Requires: `MOIN_USERNAME`, `MOIN_PASSWORD` (optional `MOIN_URL`)
 
 ### iCloud Calendar
 Read and write iCloud Calendar over CalDAV.
@@ -57,25 +68,26 @@ Read and write iCloud Calendar over CalDAV.
 - **Features**:
   - List calendars and events
   - Create and delete events
-  - Default target calendar: `Qi`
+  - Default target calendar: `Qi`; naive times use `America/Chicago`
   - Requires: `ICLOUD_EMAIL` (Apple ID), `ICLOUD_CALDAV` (app-specific password)
 
 ## Project Structure
 
 ```
 .cursor/
-├── skills/
-│   ├── add-torrent/
-│   ├── send-telegram/
-│   ├── wmt-vti-ratio/
-│   ├── check-https-certs/
-│   ├── moin-wiki/
-│   └── icloud-calendar/
+├── settings.json        # Cursor settings (enables the Gmail plugin)
+└── skills/
+    ├── add-torrent/
+    ├── send-telegram/
+    ├── wmt-vti-ratio/
+    ├── check-https-certs/
+    ├── moin-wiki/
+    └── icloud-calendar/
 ```
 
 Each skill contains:
 - **SKILL.md** — Detailed documentation on usage and implementation
-- **Helper scripts** — Python and shell scripts for execution
+- **scripts/** — Python and shell helpers the agent runs
 - **Configuration** — Environment variable requirements
 
 ## Getting Started
@@ -87,31 +99,35 @@ Each skill contains:
    ```
 
 2. **Set up environment variables**:
-   Create a `.env` file or export the required variables for the skills you plan to use:
+   Export the required variables for the skills you plan to use:
    ```bash
    export TELEGRAM_BOT_TOKEN="your_token"
    export TELEGRAM_CHAT_ID="your_chat_id"
    export TORRENT_PATH_SECRET="your_secret"
    export TORRENT_DL_TOKEN="your_token"
+   export MOIN_USERNAME="your_wiki_user"
+   export MOIN_PASSWORD="your_wiki_password"
    export ICLOUD_EMAIL="your_apple_id@example.com"
    export ICLOUD_CALDAV="your-app-specific-password"
    ```
 
-3. **Use skills in Cursor**:
+3. **Install optional dependencies** (only needed for the WMT/VTI chart):
+   ```bash
+   pip install matplotlib
+   ```
+
+4. **Use skills in Cursor**:
    Cursor agents can discover and use these skills automatically when the `.cursor` directory is present in your project.
 
 ## Requirements
 
-- **Python** (92.4% of codebase)
-- **Shell** (7.6% of codebase)
+- **Python 3.9+** — all helpers use only the standard library, except `matplotlib` for the WMT/VTI chart
+- **Bash** and **curl** — for `add-torrent.sh`
+- Outbound HTTPS access to the services each skill talks to
 
 ## Contributing
 
 Feel free to submit pull requests or open issues for new skills, improvements, or bug fixes.
-
-## License
-
-This project is open source. See LICENSE file for details.
 
 ## Author
 
