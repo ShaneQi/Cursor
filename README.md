@@ -75,7 +75,7 @@ Read and write iCloud Calendar over CalDAV.
 
 ```
 .cursor/
-├── settings.json        # Cursor settings (enables the Gmail plugin)
+├── settings.json        # Cursor settings
 └── skills/
     ├── add-torrent/
     ├── send-telegram/
